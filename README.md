@@ -2,11 +2,18 @@
 
 ## Development
 
-**Build and run:**
+**Build and run with hot reload:**
 
+In first shell run gradle to continuous build your project
 ```shell
-./gradlew clean run
+./gradlew run --continuous -Dio.ktor.development=true
 ```
+
+In another terminal run the application
+```shell
+./gradlew run -Dio.ktor.development=true
+```
+
 
 **Format:**
 

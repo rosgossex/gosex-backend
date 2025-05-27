@@ -1,4 +1,5 @@
 plugins {
+  application
   alias(libs.plugins.ktfmt)
   alias(libs.plugins.kotlin.jvm)
   alias(libs.plugins.ktor)
