@@ -27,6 +27,17 @@ dependencies {
   implementation(libs.ktor.client.core)
   implementation(libs.ktor.client.cio)
   implementation(libs.kotlinx.datetime)
+  implementation(libs.postgresql)
+  implementation(libs.exposed.core)
+  implementation(libs.exposed.dao)
+  implementation(libs.exposed.jdbc)
+  implementation(libs.exposed.kotlin.datetime)
   testImplementation(libs.ktor.server.test.host)
   testImplementation(libs.kotlin.test.junit)
+}
+
+ktfmt {
+  kotlinLangStyle()
+  blockIndent.set(2)
+  continuationIndent.set(2)
 }
