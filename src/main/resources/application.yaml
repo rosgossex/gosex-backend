@@ -1,6 +1,12 @@
 ktor:
+  development: true
   application:
     modules:
       - gosex.backend.ApplicationKt.module
   deployment:
     port: 8080
+
+gosex:
+  esia:
+    host: $GOSEX_ESIA_KEYCLOAK_HOST
+    port: $GOSEX_ESIA_KEYCLOAK_PORT

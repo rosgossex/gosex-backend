@@ -6,7 +6,7 @@
 
 In first shell run gradle to continuous build your project
 ```shell
-./gradlew run --continuous -Dio.ktor.development=true
+./gradlew -t build -x test -x check -i
 ```
 
 In another terminal run the application

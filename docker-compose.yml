@@ -1,25 +1,32 @@
 services:
   postgres:
     image: postgres:17
-    ports:
-      - "${POSTGRES_PORT}:5432"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${GOSEX_BACKEND_POSTGRES_DB}
+      POSTGRES_USER: ${GOSEX_BACKEND_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${GOSEX_BACKEND_POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - gosex-network
+
   app:
     build: .
     ports:
-      - "8080:8080"
+      - "${GOSEX_BACKEND_PORT}:8080"
     environment:
-      APP_AUTHORIZATION_ISSUER_URI: "http://app:8080"
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      GOSEX_ESIA_KEYCLOAK_PORT: ${GOSEX_ESIA_KEYCLOAK_PORT}
+      GOSEX_ESIA_KEYCLOAK_HOST: ${GOSEX_ESIA_KEYCLOAK_HOST}
+      POSTGRES_HOST: ${GOSEX_BACKEND_POSTGRES_HOST}
+      POSTGRES_PORT: ${GOSEX_BACKEND_POSTGRES_PORT}
+      POSTGRES_DB: ${GOSEX_BACKEND_POSTGRES_DB}
+      POSTGRES_USER: ${GOSEX_BACKEND_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${GOSEX_BACKEND_POSTGRES_PASSWORD}
+    networks:
+      - gosex-network
 
 volumes:
   postgres_data:
+
+networks:
+  gosex-network:
