@@ -1,1 +1,1 @@
-rootProject.name = "gosex-server"
+rootProject.name = "gosex-backend"
