@@ -8,5 +8,12 @@ ktor:
 
 gosex:
   esia:
-    host: $GOSEX_ESIA_KEYCLOAK_HOST
-    port: $GOSEX_ESIA_KEYCLOAK_PORT
+    host: $GOSEX_ESIA_HOST
+    port: $GOSEX_ESIA_PORT
+  backend:
+    postgres:
+      port: $GOSEX_BACKEND_POSTGRES_PORT
+      host: $GOSEX_BACKEND_POSTGRES_HOST
+      db: $GOSEX_BACKEND_POSTGRES_DB
+      user: $GOSEX_BACKEND_POSTGRES_USER
+      password: $GOSEX_BACKEND_POSTGRES_PASSWORD

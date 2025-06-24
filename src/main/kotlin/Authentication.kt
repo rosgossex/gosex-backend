@@ -16,10 +16,10 @@ fun Application.configureAuthentication() {
   val keycloakAudience = "gosex-backend"
   val jwksUrl = "$esiaBaseUrl/realms/gosex/protocol/openid-connect/certs"
   val jwkProvider =
-      JwkProviderBuilder(URL(jwksUrl))
-          .cached(10, 24, TimeUnit.HOURS)
-          .rateLimited(10, 1, TimeUnit.MINUTES)
-          .build()
+    JwkProviderBuilder(URL(jwksUrl))
+      .cached(10, 24, TimeUnit.HOURS)
+      .rateLimited(10, 1, TimeUnit.MINUTES)
+      .build()
 
   install(Authentication) {
     jwt("auth-jwt") {

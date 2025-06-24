@@ -1,5 +1,6 @@
 package gosex.backend
 
+import gosex.backend.db.PostgresUserRepository
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
@@ -7,7 +8,10 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
+  val userRepo = PostgresUserRepository()
+
+  configureDatabases()
   configureAuthentication()
   configureSerialization()
-  configureRouting()
+  configureRouting(userRepo)
 }
