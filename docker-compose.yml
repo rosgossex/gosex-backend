@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:17
+    image: ${GOSEX_BACKEND_POSTGRES_IMAGE}:${GOSEX_BACKEND_POSTGRES_VERSION}
     environment:
       POSTGRES_DB: ${GOSEX_BACKEND_POSTGRES_DB}
       POSTGRES_USER: ${GOSEX_BACKEND_POSTGRES_USER}
