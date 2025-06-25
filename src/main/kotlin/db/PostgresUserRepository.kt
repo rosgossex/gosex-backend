@@ -6,7 +6,6 @@ import gosex.backend.db.dao.daoToModel
 import gosex.backend.model.User
 import gosex.backend.repo.UserRepository
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 class PostgresUserRepository : UserRepository {
   override suspend fun allUsers(): List<User> = suspendTransaction {
@@ -28,8 +27,8 @@ class PostgresUserRepository : UserRepository {
     }
   }
 
-  override suspend fun removeUserById(id: String): Boolean = suspendTransaction {
-    val rowsDeleted = UserTable.deleteWhere { UserTable.id eq id }
-    rowsDeleted == 1
+  override suspend fun usersByName(name: String): List<User> = suspendTransaction {
+    val searchQuery = "%${name.lowercase()}%"
+    UserDAO.find { UserTable.fullName.lowerCase() like searchQuery }.limit(100).map(::daoToModel)
   }
 }

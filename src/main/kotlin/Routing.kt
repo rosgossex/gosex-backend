@@ -21,6 +21,16 @@ fun Application.configureRouting(userRepo: UserRepository) {
   routing {
     authenticate("auth-jwt") {
       route("/users") {
+        get("/search") {
+          val nameQuery = call.request.queryParameters["q"]
+          if (nameQuery.isNullOrBlank()) {
+            call.respond(HttpStatusCode.BadRequest, "Missing or empty 'q' query parameter")
+            return@get
+          }
+          val users = userRepo.usersByName(nameQuery)
+          call.respond(HttpStatusCode.OK, users)
+        }
+
         route("/me") {
           post {
             when (val result = userFromJwtPrincipal(call.principal<JWTPrincipal>())) {

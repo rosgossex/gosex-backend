@@ -9,5 +9,5 @@ interface UserRepository {
 
   suspend fun addUser(user: User)
 
-  suspend fun removeUserById(id: String): Boolean
+  suspend fun usersByName(name: String): List<User>
 }

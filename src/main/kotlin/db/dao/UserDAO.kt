@@ -14,7 +14,7 @@ object UserTable : IdTable<String>("users") {
   val gender = enumerationByName("gender", 10, Gender::class)
   val givenName = varchar("given_name", 255)
   val familyName = varchar("family_name", 255)
-
+  val fullName = varchar("full_name", 512)
   override val primaryKey = PrimaryKey(id)
 }
 
@@ -25,6 +25,7 @@ class UserDAO(id: EntityID<String>) : Entity<String>(id) {
   var gender by UserTable.gender
   var givenName by UserTable.givenName
   var familyName by UserTable.familyName
+  var fullName by UserTable.fullName
 }
 
 fun daoToModel(dao: UserDAO): User {

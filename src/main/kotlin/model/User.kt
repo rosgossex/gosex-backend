@@ -15,6 +15,7 @@ data class User(
   val familyName: String,
 ) {
   val age: Int
+  val fullName: String = "$givenName $familyName"
 
   init {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())

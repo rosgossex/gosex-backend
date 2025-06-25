@@ -11,7 +11,7 @@ fun Application.configureAuthentication() {
   val esiaRealm = "gosex"
   val esiaUrl = environment.config.property("gosex.esia.url").getString()
   val esiaIssuers = environment.config.property("gosex.esia.issuers").getString().split(",")
-  
+
   val audience = "gosex-backend"
   val jwksUrl = "$esiaUrl/realms/$esiaRealm/protocol/openid-connect/certs"
   val jwkProvider =
@@ -23,13 +23,13 @@ fun Application.configureAuthentication() {
   install(Authentication) {
     jwt("auth-jwt") {
       realm = esiaRealm
-      
+
       verifier(jwkProvider) {
         acceptLeeway(3)
         withAudience(audience)
         withIssuer(*esiaIssuers.toTypedArray())
       }
-      
+
       validate { credential ->
         if (credential.payload.getClaim("email_verified").asBoolean() == true) {
           JWTPrincipal(credential.payload)
