@@ -8,13 +8,12 @@ import java.net.URL
 import java.util.concurrent.TimeUnit
 
 fun Application.configureAuthentication() {
-  val esiaHost = environment.config.property("gosex.esia.host").getString()
-  val esiaPort = environment.config.property("gosex.esia.port").getString()
-  val esiaBaseUrl = "http://$esiaHost:$esiaPort"
-
-  val keycloakIssuer = "$esiaBaseUrl/realms/gosex"
-  val keycloakAudience = "gosex-backend"
-  val jwksUrl = "$esiaBaseUrl/realms/gosex/protocol/openid-connect/certs"
+  val esiaRealm = "gosex"
+  val esiaUrl = environment.config.property("gosex.esia.url").getString()
+  val esiaIssuers = environment.config.property("gosex.esia.issuers").getString().split(",")
+  
+  val audience = "gosex-backend"
+  val jwksUrl = "$esiaUrl/realms/$esiaRealm/protocol/openid-connect/certs"
   val jwkProvider =
     JwkProviderBuilder(URL(jwksUrl))
       .cached(10, 24, TimeUnit.HOURS)
@@ -23,11 +22,14 @@ fun Application.configureAuthentication() {
 
   install(Authentication) {
     jwt("auth-jwt") {
-      realm = "gosex"
-      verifier(jwkProvider, keycloakIssuer) {
+      realm = esiaRealm
+      
+      verifier(jwkProvider) {
         acceptLeeway(3)
-        withAudience(keycloakAudience)
+        withAudience(audience)
+        withIssuer(*esiaIssuers.toTypedArray())
       }
+      
       validate { credential ->
         if (credential.payload.getClaim("email_verified").asBoolean() == true) {
           JWTPrincipal(credential.payload)

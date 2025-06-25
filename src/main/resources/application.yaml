@@ -4,12 +4,12 @@ ktor:
     modules:
       - gosex.backend.ApplicationKt.module
   deployment:
-    port: 8080
+    port: 6969
 
 gosex:
   esia:
-    host: $GOSEX_ESIA_HOST
-    port: $GOSEX_ESIA_PORT
+    url: $GOSEX_ESIA_URL
+    issuers: $GOSEX_ESIA_ISSUERS
   backend:
     postgres:
       port: $GOSEX_BACKEND_POSTGRES_PORT
