@@ -23,7 +23,7 @@ class PostgresUserRepository : UserRepository {
         gender = user.gender
         givenName = user.givenName
         familyName = user.familyName
-        fullName = dao.fullName
+        fullName = user.fullName
       }
     }
   }
