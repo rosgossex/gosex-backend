@@ -43,7 +43,6 @@ class PostgresUserRepositoryIntegrationTest {
 
   @BeforeAll
   fun setUp() {
-    // Ensure the container is running
     if (!postgresContainer.isRunning) {
       postgresContainer.start()
     }
@@ -58,7 +57,6 @@ class PostgresUserRepositoryIntegrationTest {
         user = postgresContainer.username,
         password = postgresContainer.password,
       )
-    // Set the database as the default for Exposed
     TransactionManager.defaultDatabase = database
 
     transaction(database) { SchemaUtils.create(UserTable) }
@@ -77,7 +75,6 @@ class PostgresUserRepositoryIntegrationTest {
 
   @Test
   fun `should add user and find by id`() = runBlocking {
-    // Given
     val user =
       User(
         id = "user123",
@@ -87,11 +84,9 @@ class PostgresUserRepositoryIntegrationTest {
         familyName = "Doe",
       )
 
-    // When
     repository.addUser(user)
     val foundUser = repository.userById("user123")
 
-    // Then
     assertNotNull(foundUser)
     assertEquals("user123", foundUser.id)
     assertEquals(LocalDate(1990, 5, 15), foundUser.birthdate)
@@ -103,16 +98,13 @@ class PostgresUserRepositoryIntegrationTest {
 
   @Test
   fun `should return null when user not found`() = runBlocking {
-    // When
     val foundUser = repository.userById("nonexistent")
 
-    // Then
     assertNull(foundUser)
   }
 
   @Test
   fun `should find all users`() = runBlocking {
-    // Given
     val user1 =
       User(
         id = "user1",
@@ -133,10 +125,8 @@ class PostgresUserRepositoryIntegrationTest {
     repository.addUser(user1)
     repository.addUser(user2)
 
-    // When
     val users = repository.allUsers()
 
-    // Then
     assertEquals(2, users.size)
     assertTrue(users.any { it.id == "user1" })
     assertTrue(users.any { it.id == "user2" })
@@ -144,7 +134,6 @@ class PostgresUserRepositoryIntegrationTest {
 
   @Test
   fun `should find users by name`() = runBlocking {
-    // Given
     val user1 =
       User(
         id = "user1",
@@ -174,11 +163,9 @@ class PostgresUserRepositoryIntegrationTest {
     repository.addUser(user2)
     repository.addUser(user3)
 
-    // When
     val johnUsers = repository.usersByName("John")
     val doeUsers = repository.usersByName("Doe")
 
-    // Then
     assertEquals(2, johnUsers.size)
     assertTrue(johnUsers.any { it.id == "user1" })
     assertTrue(johnUsers.any { it.id == "user3" })
@@ -190,7 +177,6 @@ class PostgresUserRepositoryIntegrationTest {
 
   @Test
   fun `should find no users when search query matches none`() = runBlocking {
-    // Given
     val user =
       User(
         id = "user1",
@@ -201,10 +187,8 @@ class PostgresUserRepositoryIntegrationTest {
       )
     repository.addUser(user)
 
-    // When
     val users = repository.usersByName("NonExistent")
 
-    // Then
     assertEquals(0, users.size)
   }
 }
