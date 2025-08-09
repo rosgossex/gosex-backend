@@ -45,6 +45,10 @@ The application follows a layered architecture:
 
 - **No inline comments**: Code must not contain inline comments (e.g., `// something...`). Code should be self-documenting through clear naming and structure.
 
+### Git Workflow Rules
+
+- **Explicit file staging**: Never use `git add .` - always explicitly specify which files to stage (e.g., `git add file1.kt file2.kt`). This ensures intentional commits and prevents accidental inclusion of unwanted files.
+
 ### Deployment
 
 ```bash
