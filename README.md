@@ -5,20 +5,42 @@
 **Build and run with hot reload:**
 
 In first shell run gradle to continuous build your project
+
 ```shell
 ./gradlew -t build -x test -x check -i
 ```
 
 In another terminal run the application
+
 ```shell
 ./gradlew run -Dio.ktor.development=true
 ```
 
-
 **Format:**
 
 ```shell
-./gradlew ktfmtFormat     
+./gradlew ktfmtFormat
+```
+
+**Pre-commit Hooks:**
+
+Install pre-commit to automatically format code before commits:
+
+```shell
+pip install pre-commit
+pre-commit install
+```
+
+The hooks will automatically run `ktfmtFormat` before each commit. To run manually:
+
+```shell
+pre-commit run --all-files
+```
+
+To bypass hooks (not recommended):
+
+```shell
+git commit --no-verify
 ```
 
 ## Testing
@@ -44,7 +66,6 @@ Open `build/reports/jacoco/test/html/index.html` in your browser.
 ```shell
 ./gradlew jacocoTestCoverageVerification
 ```
-
 
 ## Deployment
 
