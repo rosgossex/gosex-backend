@@ -5,20 +5,21 @@
 **Build and run with hot reload:**
 
 In first shell run gradle to continuous build your project
+
 ```shell
 ./gradlew -t build -x test -x check -i
 ```
 
 In another terminal run the application
+
 ```shell
 ./gradlew run -Dio.ktor.development=true
 ```
 
-
 **Format:**
 
 ```shell
-./gradlew ktfmtFormat     
+./gradlew ktfmtFormat
 ```
 
 ## Testing
@@ -44,7 +45,6 @@ Open `build/reports/jacoco/test/html/index.html` in your browser.
 ```shell
 ./gradlew jacocoTestCoverageVerification
 ```
-
 
 ## Deployment
 

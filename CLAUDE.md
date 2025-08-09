@@ -9,6 +9,7 @@ This is a Kotlin backend service built with Ktor framework for a dating applicat
 ## Architecture
 
 The application follows a layered architecture:
+
 - **API Layer**: Ktor routing and controllers in `Routing.kt`
 - **Service Layer**: Repository interfaces in `repo/` package
 - **Data Access Layer**: PostgreSQL implementation using Exposed ORM in `db/` package
@@ -25,6 +26,7 @@ The application follows a layered architecture:
 ## Common Development Tasks
 
 ### Build and Run
+
 ```bash
 # Continuous build with hot reload
 ./gradlew -t build -x test -x check -i
@@ -34,20 +36,24 @@ The application follows a layered architecture:
 ```
 
 ### Code Formatting
+
 ```bash
 ./gradlew ktfmtFormat
 ```
 
 ### Code Style Rules
+
 - **No inline comments**: Code must not contain inline comments (e.g., `// something...`). Code should be self-documenting through clear naming and structure.
 
 ### Deployment
+
 ```bash
 docker compose --env-file .env.dev up -d --wait --build
 ```
 
 ## Project Structure
-- `src/main/kotlin/`: Main source code
+
+- `src/main/kotlin/gosex`: Main source code
 - `Application.kt`: Entry point and module configuration
 - `Routing.kt`: API endpoint definitions
 - `Authentication.kt`: JWT authentication configuration
