@@ -93,7 +93,7 @@ The project uses GitHub Actions for automated testing and quality assurance:
 
 ## Project Structure
 
-- `src/main/kotlin/gosex`: Main source code
+- `src/main/kotlin/gosex/backend`: Main source code
   - `Application.kt`: Entry point and module configuration
   - `Routing.kt`: API endpoint definitions
   - `Authentication.kt`: JWT authentication configuration
