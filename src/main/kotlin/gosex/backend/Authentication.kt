@@ -4,7 +4,7 @@ import com.auth0.jwk.JwkProviderBuilder
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import java.net.URL
+import java.net.URI
 import java.util.concurrent.TimeUnit
 
 fun Application.configureAuthentication() {
@@ -15,7 +15,7 @@ fun Application.configureAuthentication() {
   val audience = "gosex-backend"
   val jwksUrl = "$esiaUrl/realms/$esiaRealm/protocol/openid-connect/certs"
   val jwkProvider =
-    JwkProviderBuilder(URL(jwksUrl))
+    JwkProviderBuilder(URI.create(jwksUrl).toURL())
       .cached(10, 24, TimeUnit.HOURS)
       .rateLimited(10, 1, TimeUnit.MINUTES)
       .build()
