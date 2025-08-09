@@ -4,6 +4,7 @@ plugins {
   alias(libs.plugins.kotlin.jvm)
   alias(libs.plugins.ktor)
   alias(libs.plugins.kotlin.plugin.serialization)
+  jacoco
 }
 
 group = "gosex.backend"
@@ -34,6 +35,45 @@ dependencies {
   implementation(libs.exposed.kotlin.datetime)
   testImplementation(libs.ktor.server.test.host)
   testImplementation(libs.kotlin.test.junit)
+  testImplementation(libs.junit.jupiter.api)
+  testImplementation(libs.testcontainers.junit.jupiter)
+  testImplementation(libs.testcontainers.postgresql)
+  testRuntimeOnly(libs.junit.jupiter.engine)
+  testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.test {
+  useJUnitPlatform()
+  finalizedBy(tasks.jacocoTestReport)
+  
+  testLogging {
+    events("passed", "failed")
+    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    showExceptions = true
+    showCauses = true
+    showStackTraces = true
+  }
+}
+
+tasks.jacocoTestReport {
+  dependsOn(tasks.test)
+  reports {
+    xml.required.set(true)
+    html.required.set(true)
+    csv.required.set(false)
+  }
+  
+  sourceSets(sourceSets.main.get())
+}
+
+tasks.jacocoTestCoverageVerification {
+  violationRules {
+    rule {
+      limit {
+        minimum = "0.5".toBigDecimal()
+      }
+    }
+  }
 }
 
 ktfmt {
