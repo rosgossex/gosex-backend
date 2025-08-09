@@ -45,7 +45,7 @@ dependencies {
 tasks.test {
   useJUnitPlatform()
   finalizedBy(tasks.jacocoTestReport)
-  
+
   testLogging {
     events("passed", "failed")
     exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
@@ -62,18 +62,12 @@ tasks.jacocoTestReport {
     html.required.set(true)
     csv.required.set(false)
   }
-  
+
   sourceSets(sourceSets.main.get())
 }
 
 tasks.jacocoTestCoverageVerification {
-  violationRules {
-    rule {
-      limit {
-        minimum = "0.5".toBigDecimal()
-      }
-    }
-  }
+  violationRules { rule { limit { minimum = "0.5".toBigDecimal() } } }
 }
 
 ktfmt {
