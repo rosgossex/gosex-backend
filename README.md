@@ -22,6 +22,27 @@ In another terminal run the application
 ./gradlew ktfmtFormat
 ```
 
+**Pre-commit Hooks:**
+
+Install pre-commit to automatically format code before commits:
+
+```shell
+pip install pre-commit
+pre-commit install
+```
+
+The hooks will automatically run `ktfmtFormat` before each commit. To run manually:
+
+```shell
+pre-commit run --all-files
+```
+
+To bypass hooks (not recommended):
+
+```shell
+git commit --no-verify
+```
+
 ## Testing
 
 **Run all tests:**

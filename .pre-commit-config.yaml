@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ktfmt
+        name: ktfmt
+        description: Format Kotlin code with ktfmt
+        entry: ./gradlew ktfmtFormat
+        language: system
+        files: \.kt$
+        pass_filenames: false
