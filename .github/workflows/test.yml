@@ -1,4 +1,4 @@
-name: Run Tests
+
 
 on:
   push:
@@ -59,6 +59,16 @@ jobs:
 
     - name: Generate test report
       run: ./gradlew jacocoTestReport
+
+    - name: Add coverage to PR
+      id: jacoco
+      uses: madrapps/jacoco-report@v1.6.1
+      if: github.event_name == 'pull_request'
+      with:
+        paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+        token: ${{ secrets.GITHUB_TOKEN }}
+        min-coverage-overall: 50
+        min-coverage-changed-files: 50
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4
