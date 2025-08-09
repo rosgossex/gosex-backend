@@ -4,6 +4,7 @@ plugins {
   alias(libs.plugins.kotlin.jvm)
   alias(libs.plugins.ktor)
   alias(libs.plugins.kotlin.plugin.serialization)
+  jacoco
 }
 
 group = "gosex.backend"
@@ -43,6 +44,7 @@ dependencies {
 
 tasks.test {
   useJUnitPlatform()
+  finalizedBy(tasks.jacocoTestReport)
   
   testLogging {
     events("passed", "failed")
@@ -50,6 +52,27 @@ tasks.test {
     showExceptions = true
     showCauses = true
     showStackTraces = true
+  }
+}
+
+tasks.jacocoTestReport {
+  dependsOn(tasks.test)
+  reports {
+    xml.required.set(true)
+    html.required.set(true)
+    csv.required.set(false)
+  }
+  
+  sourceSets(sourceSets.main.get())
+}
+
+tasks.jacocoTestCoverageVerification {
+  violationRules {
+    rule {
+      limit {
+        minimum = "0.5".toBigDecimal()
+      }
+    }
   }
 }
 

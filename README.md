@@ -21,6 +21,30 @@ In another terminal run the application
 ./gradlew ktfmtFormat     
 ```
 
+## Testing
+
+**Run all tests:**
+
+```shell
+./gradlew test
+```
+
+**Generate coverage report:**
+
+```shell
+./gradlew test jacocoTestReport
+```
+
+**View coverage report:**
+
+Open `build/reports/jacoco/test/html/index.html` in your browser.
+
+**Coverage verification (50% minimum):**
+
+```shell
+./gradlew jacocoTestCoverageVerification
+```
+
 
 ## Deployment
 
