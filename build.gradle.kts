@@ -38,6 +38,8 @@ dependencies {
   testImplementation(libs.junit.jupiter.api)
   testImplementation(libs.testcontainers.junit.jupiter)
   testImplementation(libs.testcontainers.postgresql)
+  testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+  testImplementation("org.mockito:mockito-core:5.8.0")
   testRuntimeOnly(libs.junit.jupiter.engine)
   testRuntimeOnly(libs.junit.platform.launcher)
 }
