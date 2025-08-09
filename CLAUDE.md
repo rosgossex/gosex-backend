@@ -38,6 +38,9 @@ The application follows a layered architecture:
 ./gradlew ktfmtFormat
 ```
 
+### Code Style Rules
+- **No inline comments**: Code must not contain inline comments (e.g., `// something...`). Code should be self-documenting through clear naming and structure.
+
 ### Deployment
 ```bash
 docker compose --env-file .env.dev up -d --wait --build
