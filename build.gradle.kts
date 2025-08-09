@@ -34,6 +34,23 @@ dependencies {
   implementation(libs.exposed.kotlin.datetime)
   testImplementation(libs.ktor.server.test.host)
   testImplementation(libs.kotlin.test.junit)
+  testImplementation(libs.junit.jupiter.api)
+  testImplementation(libs.testcontainers.junit.jupiter)
+  testImplementation(libs.testcontainers.postgresql)
+  testRuntimeOnly(libs.junit.jupiter.engine)
+  testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.test {
+  useJUnitPlatform()
+  
+  testLogging {
+    events("passed", "failed")
+    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    showExceptions = true
+    showCauses = true
+    showStackTraces = true
+  }
 }
 
 ktfmt {
