@@ -21,16 +21,21 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Testcontainers
 @TestPropertySource(
   properties =
     [
       "gosex.esia.url=http://localhost:8080",
-      "spring.datasource.url=jdbc:h2:mem:testdb",
-      "spring.datasource.driver-class-name=org.h2.Driver",
-      "spring.jpa.hibernate.ddl-auto=create-drop",
+      "spring.datasource.url=jdbc:tc:postgresql:17-alpine:///testdb",
+      "spring.datasource.driver-class-name=org.testcontainers.jdbc.ContainerDatabaseDriver",
+      "spring.jpa.hibernate.ddl-auto=create",
+      "spring.jpa.properties.hibernate.hbm2ddl.auto=create",
     ]
 )
 class UserControllerIntegrationTest {
@@ -41,6 +46,17 @@ class UserControllerIntegrationTest {
   @MockBean private lateinit var jwtDecoder: JwtDecoder
 
   private lateinit var testUser: User
+
+  companion object {
+    @Container
+    @JvmStatic
+    private val postgresContainer =
+      PostgreSQLContainer<Nothing>("postgres:17-alpine").apply {
+        withDatabaseName("testdb")
+        withUsername("test")
+        withPassword("test")
+      }
+  }
 
   @BeforeEach
   fun setUp() {
