@@ -1,9 +1,10 @@
 plugins {
-  application
+  id("org.springframework.boot") version "3.2.5"
+  id("io.spring.dependency-management") version "1.1.4"
   alias(libs.plugins.ktfmt)
   alias(libs.plugins.kotlin.jvm)
-  alias(libs.plugins.ktor)
-  alias(libs.plugins.kotlin.plugin.serialization)
+  kotlin("plugin.spring") version "2.1.20"
+  kotlin("plugin.jpa") version "2.1.20"
   jacoco
 }
 
@@ -11,37 +12,26 @@ group = "gosex.backend"
 
 version = "0.0.1-SNAPSHOT"
 
-application { mainClass = "io.ktor.server.netty.EngineMain" }
+java { sourceCompatibility = JavaVersion.VERSION_21 }
 
 repositories { mavenCentral() }
 
 dependencies {
-  implementation(libs.ktor.server.core)
-  implementation(libs.ktor.server.netty)
-  implementation(libs.logback.classic)
-  implementation(libs.ktor.server.config.yaml)
-  implementation(libs.ktor.server.content.negotiation)
-  implementation(libs.ktor.client.content.negotiation)
-  implementation(libs.ktor.serialization.kotlinx.json)
-  implementation(libs.ktor.server.auth)
-  implementation(libs.ktor.server.auth.jwt)
-  implementation(libs.ktor.server.resources)
-  implementation(libs.ktor.client.core)
-  implementation(libs.ktor.client.cio)
+  implementation("org.springframework.boot:spring-boot-starter-web")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+  implementation("org.springframework.boot:spring-boot-starter-security")
+  implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+  implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation(libs.kotlinx.datetime)
   implementation(libs.postgresql)
-  implementation(libs.exposed.core)
-  implementation(libs.exposed.dao)
-  implementation(libs.exposed.jdbc)
-  implementation(libs.exposed.kotlin.datetime)
-  testImplementation(libs.ktor.server.test.host)
-  testImplementation(libs.kotlin.test.junit)
-  testImplementation(libs.junit.jupiter.api)
+
+  testImplementation("org.springframework.boot:spring-boot-starter-test")
+  testImplementation("org.springframework.security:spring-security-test")
   testImplementation(libs.testcontainers.junit.jupiter)
   testImplementation(libs.testcontainers.postgresql)
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
-  testImplementation("org.mockito:mockito-core:5.8.0")
-  testRuntimeOnly(libs.junit.jupiter.engine)
+  testRuntimeOnly("com.h2database:h2")
   testRuntimeOnly(libs.junit.platform.launcher)
 }
 

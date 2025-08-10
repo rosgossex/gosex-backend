@@ -4,25 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Kotlin backend service built with Ktor framework for a dating application called "GoSex". The service handles user authentication via JWT tokens from an ESIA (Russian government authentication system) and provides user management functionality.
+This is a Kotlin backend service built with Spring Boot framework for a dating application called "GoSex". The service handles user authentication via JWT tokens from an ESIA (Russian government authentication system) and provides user management functionality.
 
 ## Architecture
 
 The application follows a layered architecture:
 
-- **API Layer**: Ktor routing and controllers in `Routing.kt`
-- **Service Layer**: Repository interfaces in `repo/` package
-- **Data Access Layer**: PostgreSQL implementation using Exposed ORM in `db/` package
-- **Model Layer**: Data classes in `model/` package
-- **Authentication**: JWT-based authentication with ESIA integration in `Authentication.kt`
+- **API Layer**: Spring MVC controllers in `controller/` package
+- **Service Layer**: Spring services with dependency injection in `service/` package
+- **Data Access Layer**: Spring Data JPA repositories in `repository/` package
+- **Model Layer**: JPA entities in `model/` package
+- **Authentication**: Spring Security with JWT resource server configuration
 
 ## Key Components
 
-1. **Authentication**: Uses JWT tokens from ESIA with JWK verification
-2. **User Management**: CRUD operations for users with search functionality via service layer
-3. **Database**: PostgreSQL with Exposed ORM for data persistence
-4. **API**: RESTful endpoints for user registration and search
-5. **Testing**: Comprehensive unit and integration tests with JaCoCo coverage
+1. **Authentication**: Spring Security with JWT resource server and JWK verification
+2. **User Management**: CRUD operations for users with search functionality via Spring Data JPA
+3. **Database**: PostgreSQL with Spring Data JPA for data persistence
+4. **API**: RESTful endpoints using Spring MVC for user registration and search
+5. **Testing**: Comprehensive unit and integration tests using Spring Boot Test framework with JaCoCo coverage
 6. **CI/CD**: GitHub Actions workflow for automated testing and coverage reporting
 
 ## Common Development Tasks
@@ -34,7 +34,7 @@ The application follows a layered architecture:
 ./gradlew -t build -x test -x check -i
 
 # Run application
-./gradlew run -Dio.ktor.development=true
+./gradlew bootRun
 ```
 
 ### Code Formatting
@@ -94,16 +94,14 @@ The project uses GitHub Actions for automated testing and quality assurance:
 ## Project Structure
 
 - `src/main/kotlin/gosex/backend`: Main source code
-  - `Application.kt`: Entry point and module configuration
-  - `Routing.kt`: API endpoint definitions
-  - `Authentication.kt`: JWT authentication configuration
-  - `Databases.kt`: Database connection setup
-  - `model/`: Data classes (User, Gender)
-  - `db/`: Database access layer with Exposed ORM
-  - `repo/`: Repository interfaces
-  - `service/`: Business logic service layer
-- `src/test/kotlin/gosex`: Test source code
+  - `Application.kt`: Spring Boot main application class
+  - `Authentication.kt`: Spring Security configuration
+  - `controller/`: Spring MVC REST controllers
+  - `model/`: JPA entities (User, Gender)
+  - `repository/`: Spring Data JPA repositories
+  - `service/`: Spring service layer with business logic
+- `src/test/kotlin/gosex/backend`: Test source code
   - `service/`: Unit tests for service layer
-  - `db/`: Integration tests for database layer
-- `src/main/resources/application.yaml`: Configuration file
+  - `repository/`: Integration tests for repository layer using Spring Boot Test
+- `src/main/resources/application.yaml`: Spring Boot configuration file
 - `.github/workflows/`: GitHub Actions CI/CD pipeline

@@ -1,42 +1,55 @@
 package gosex.backend
 
-import com.auth0.jwk.JwkProviderBuilder
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import java.net.URI
-import java.util.concurrent.TimeUnit
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.jwt.JwtDecoder
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
+import org.springframework.security.web.SecurityFilterChain
 
-fun Application.configureAuthentication() {
-  val esiaRealm = "gosex"
-  val esiaUrl = environment.config.property("gosex.esia.url").getString()
-  val esiaIssuers = environment.config.property("gosex.esia.issuers").getString().split(",")
+@Configuration
+@EnableWebSecurity
+class SecurityConfiguration {
 
-  val audience = "gosex-backend"
-  val jwksUrl = "$esiaUrl/realms/$esiaRealm/protocol/openid-connect/certs"
-  val jwkProvider =
-    JwkProviderBuilder(URI.create(jwksUrl).toURL())
-      .cached(10, 24, TimeUnit.HOURS)
-      .rateLimited(10, 1, TimeUnit.MINUTES)
-      .build()
+  @Value("\${gosex.esia.url}") private lateinit var esiaUrl: String
 
-  install(Authentication) {
-    jwt("auth-jwt") {
-      realm = esiaRealm
-
-      verifier(jwkProvider) {
-        acceptLeeway(3)
-        withAudience(audience)
-        withIssuer(*esiaIssuers.toTypedArray())
+  @Bean
+  fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    return http
+      .csrf { it.disable() }
+      .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+      .authorizeHttpRequests { requests ->
+        requests.requestMatchers("/actuator/health").permitAll().anyRequest().authenticated()
       }
+      .oauth2ResourceServer { oauth2 ->
+        oauth2.jwt { jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()) }
+      }
+      .build()
+  }
 
-      validate { credential ->
-        if (credential.payload.getClaim("email_verified").asBoolean() == true) {
-          JWTPrincipal(credential.payload)
-        } else {
-          null
-        }
+  @Bean
+  fun jwtDecoder(): JwtDecoder {
+    val jwksUri = "$esiaUrl/realms/gosex/protocol/openid-connect/certs"
+    return NimbusJwtDecoder.withJwkSetUri(jwksUri).build()
+  }
+
+  @Bean
+  fun jwtAuthenticationConverter(): JwtAuthenticationConverter {
+    val converter = JwtAuthenticationConverter()
+    converter.setJwtGrantedAuthoritiesConverter { jwt: Jwt ->
+      val emailVerified = jwt.getClaim<Boolean>("email_verified") ?: false
+      if (emailVerified) {
+        listOf(SimpleGrantedAuthority("ROLE_USER"))
+      } else {
+        emptyList()
       }
     }
+    return converter
   }
 }
