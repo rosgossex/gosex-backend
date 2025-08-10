@@ -1,5 +1,5 @@
 services:
-  postgres:
+  db:
     image: ${GOSEX_BACKEND_POSTGRES_IMAGE}:${GOSEX_BACKEND_POSTGRES_VERSION}
     environment:
       POSTGRES_DB: ${GOSEX_BACKEND_POSTGRES_DB}
@@ -9,8 +9,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: psql -U ${GOSEX_BACKEND_POSTGRES_USER} -tAc 'select 1' -d ${GOSEX_BACKEND_POSTGRES_DB}
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
-  app:
+  backend:
     build: .
     ports:
       - "6969:6969"
@@ -22,6 +28,9 @@ services:
       GOSEX_BACKEND_POSTGRES_DB: ${GOSEX_BACKEND_POSTGRES_DB}
       GOSEX_BACKEND_POSTGRES_USER: ${GOSEX_BACKEND_POSTGRES_USER}
       GOSEX_BACKEND_POSTGRES_PASSWORD: ${GOSEX_BACKEND_POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:

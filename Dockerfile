@@ -3,6 +3,9 @@ WORKDIR /app
 
 COPY build.gradle.kts settings.gradle.kts gradle.properties ./
 COPY gradle/libs.versions.toml gradle/libs.versions.toml
+
+RUN gradle dependencies --no-daemon
+
 COPY src ./src
 
 RUN gradle bootJar --no-daemon
