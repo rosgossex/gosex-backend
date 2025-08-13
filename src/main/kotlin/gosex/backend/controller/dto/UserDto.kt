@@ -3,12 +3,12 @@ package gosex.backend.controller.dto
 import gosex.backend.model.Gender
 import gosex.backend.model.User
 import io.swagger.v3.oas.annotations.media.Schema
-import java.time.LocalDate
+import java.time.LocalDate as JavaLocalDate
 
 @Schema(description = "User information")
 data class UserDto(
   @Schema(description = "User unique identifier", example = "user-123") val id: String,
-  @Schema(description = "User's birth date", example = "1990-05-15") val birthdate: LocalDate,
+  @Schema(description = "User's birth date", example = "1990-05-15") val birthdate: JavaLocalDate,
   @Schema(description = "User's gender") val gender: Gender,
   @Schema(description = "User's given name", example = "John") val givenName: String,
   @Schema(description = "User's family name", example = "Doe") val familyName: String,
