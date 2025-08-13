@@ -92,7 +92,7 @@ class UserControllerIntegrationTest {
     mockMvc
       .perform(get("/users/search").param("q", "").with(jwt()))
       .andExpect(status().isBadRequest)
-      .andExpect(content().string("Missing or empty 'q' query parameter"))
+      .andExpect(content().json("{\"message\":\"Missing or empty 'q' query parameter\"}"))
   }
 
   @Test
@@ -174,7 +174,7 @@ class UserControllerIntegrationTest {
           )
       )
       .andExpect(status().isBadRequest)
-      .andExpect(content().string("User is underaged"))
+      .andExpect(content().json("{\"message\":\"User is underaged\"}"))
   }
 
   @Test
