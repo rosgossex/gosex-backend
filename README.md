@@ -1,4 +1,16 @@
-# GoSex backend
+# GoSex Backend
+
+A Kotlin backend service built with Spring Boot for a dating application. The service handles user authentication via JWT tokens from ESIA (Russian government authentication system) and provides user management functionality.
+
+## Architecture
+
+The application follows a layered architecture:
+
+- **API Layer**: Spring MVC controllers for RESTful endpoints
+- **Service Layer**: Spring services with dependency injection for business logic
+- **Data Access Layer**: Spring Data JPA repositories for data persistence
+- **Model Layer**: JPA entities for domain objects
+- **Authentication**: Spring Security with JWT resource server configuration
 
 ## Development
 
@@ -13,7 +25,7 @@ In first shell run gradle to continuous build your project
 In another terminal run the application
 
 ```shell
-./gradlew run -Dio.ktor.development=true
+./gradlew bootRun
 ```
 
 **Format:**
@@ -51,6 +63,18 @@ git commit --no-verify
 ./gradlew test
 ```
 
+**Run only unit tests:**
+
+```shell
+./gradlew test --tests "*.service.*"
+```
+
+**Run only integration tests:**
+
+```shell
+./gradlew test --tests "*.db.*"
+```
+
 **Generate coverage report:**
 
 ```shell
@@ -70,5 +94,5 @@ Open `build/reports/jacoco/test/html/index.html` in your browser.
 ## Deployment
 
 ```shell
-docker compose --env-file .env.dev up -d --wait --build
+docker compose up
 ```
