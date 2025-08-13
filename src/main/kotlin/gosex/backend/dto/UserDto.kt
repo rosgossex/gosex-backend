@@ -1,4 +1,4 @@
-package gosex.backend.controller.dto
+package gosex.backend.dto
 
 import gosex.backend.model.Gender
 import gosex.backend.model.User

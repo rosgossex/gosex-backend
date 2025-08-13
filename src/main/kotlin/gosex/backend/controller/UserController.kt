@@ -1,9 +1,10 @@
 package gosex.backend.controller
 
-import gosex.backend.controller.dto.ErrorResponseDto
-import gosex.backend.controller.dto.UserDto
-import gosex.backend.service.APIResult
+import gosex.backend.dto.ErrorResponseDto
+import gosex.backend.dto.ServiceError
+import gosex.backend.dto.UserDto
 import gosex.backend.service.UserService
+import gosex.backend.util.Result
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ArraySchema
@@ -64,7 +65,7 @@ class UserController(private val userService: UserService) {
   ): ResponseEntity<Any> {
     if (q.isBlank()) {
       return ResponseEntity.badRequest()
-        .body(ErrorResponseDto("Missing or empty 'q' query parameter"))
+        .body(ErrorResponseDto.fromServiceError(ServiceError.MISSING_QUERY_PARAMETER))
     }
     val users = userService.searchUsersByName(q)
     val userDtos = users.map { UserDto.fromUser(it) }
@@ -130,10 +131,11 @@ class UserController(private val userService: UserService) {
     @Parameter(hidden = true) @AuthenticationPrincipal jwt: Jwt
   ): ResponseEntity<Any> {
     return when (val result = userService.getUserOrRegister(jwt)) {
-      is APIResult.Error -> {
-        ResponseEntity.status(result.code).body(ErrorResponseDto(result.message))
+      is Result.Error -> {
+        ResponseEntity.status(result.error.httpStatus)
+          .body(ErrorResponseDto.fromServiceError(result.error, result.message))
       }
-      is APIResult.Success -> {
+      is Result.Success -> {
         val registrationResult = result.value
         val statusCode =
           if (registrationResult.wasCreated) {

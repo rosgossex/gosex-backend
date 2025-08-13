@@ -1,18 +1,13 @@
 package gosex.backend.service
 
+import gosex.backend.dto.ServiceError
 import gosex.backend.model.*
 import gosex.backend.repository.*
+import gosex.backend.util.Result
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
-import org.springframework.http.HttpStatus
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
-
-sealed class APIResult<out T> {
-  data class Success<out T>(val value: T) : APIResult<T>()
-
-  data class Error(val code: HttpStatus, val message: String) : APIResult<Nothing>()
-}
 
 data class UserRegistrationResult(val user: User, val wasCreated: Boolean)
 
@@ -23,29 +18,29 @@ class UserService(private val userRepository: UserRepository) {
     return userRepository.findByNameContainingIgnoreCase(nameQuery)
   }
 
-  fun getUserOrRegister(jwt: Jwt?): APIResult<UserRegistrationResult> {
+  fun getUserOrRegister(jwt: Jwt?): Result<UserRegistrationResult, ServiceError> {
     when (val result = userFromJwt(jwt)) {
-      is APIResult.Error -> return result
-      is APIResult.Success -> {
+      is Result.Error -> return result
+      is Result.Success -> {
         val user = result.value
         val existingUser = userRepository.findById(user.id).orElse(null)
         if (existingUser != null) {
-          return APIResult.Success(UserRegistrationResult(existingUser, false))
+          return Result.Success(UserRegistrationResult(existingUser, false))
         }
 
         if (user.age < 18) {
-          return APIResult.Error(HttpStatus.BAD_REQUEST, "User is underaged")
+          return Result.Error(ServiceError.USER_UNDERAGED)
         }
 
         val savedUser = userRepository.save(user)
-        return APIResult.Success(UserRegistrationResult(savedUser, true))
+        return Result.Success(UserRegistrationResult(savedUser, true))
       }
     }
   }
 
-  private fun userFromJwt(jwt: Jwt?): APIResult<User> {
+  private fun userFromJwt(jwt: Jwt?): Result<User, ServiceError> {
     if (jwt == null) {
-      return APIResult.Error(HttpStatus.BAD_REQUEST, "No JWT")
+      return Result.Error(ServiceError.MISSING_JWT)
     }
 
     val userId = jwt.getClaim<String>("sub")
@@ -61,9 +56,11 @@ class UserService(private val userRepository: UserRepository) {
         birthdateString == null ||
         genderString == null
     ) {
-      return APIResult.Error(
-        HttpStatus.BAD_REQUEST,
-        "Missing required JWT claims: userId=$userId givenName=$givenName familyName=$familyName birthdateString=$birthdateString genderString=$genderString",
+      return Result.Error(
+        ServiceError.MISSING_JWT_CLAIMS,
+        ServiceError.MISSING_JWT_CLAIMS.formatMessage(
+          "userId=$userId givenName=$givenName familyName=$familyName birthdateString=$birthdateString genderString=$genderString"
+        ),
       )
     }
 
@@ -71,14 +68,14 @@ class UserService(private val userRepository: UserRepository) {
       try {
         LocalDate.parse(birthdateString)
       } catch (e: DateTimeParseException) {
-        return APIResult.Error(HttpStatus.BAD_REQUEST, "Invalid birthdate format in JWT")
+        return Result.Error(ServiceError.INVALID_BIRTHDATE_FORMAT)
       }
 
     val gender =
       when (genderString) {
         "male" -> Gender.Male
         "female" -> Gender.Female
-        else -> return APIResult.Error(HttpStatus.BAD_REQUEST, "Invalid gender in JWT")
+        else -> return Result.Error(ServiceError.INVALID_GENDER)
       }
 
     val user =
@@ -90,6 +87,6 @@ class UserService(private val userRepository: UserRepository) {
         familyName = familyName,
         fullName = "$givenName $familyName",
       )
-    return APIResult.Success(user)
+    return Result.Success(user)
   }
 }

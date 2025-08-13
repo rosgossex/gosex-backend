@@ -1,8 +1,10 @@
 package gosex.backend.service
 
+import gosex.backend.dto.ServiceError
 import gosex.backend.model.Gender
 import gosex.backend.model.User
 import gosex.backend.repository.UserRepository
+import gosex.backend.util.Result
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
@@ -14,7 +16,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.http.HttpStatus
 import org.springframework.security.oauth2.jwt.Jwt
 
 class UserServiceTest {
@@ -77,10 +78,9 @@ class UserServiceTest {
   fun `getUserOrRegister should return error when JWT is null`() {
     val result = userService.getUserOrRegister(null)
 
-    assertTrue(result is APIResult.Error)
-    result as APIResult.Error
-    assertEquals(HttpStatus.BAD_REQUEST, result.code)
-    assertEquals("No JWT", result.message)
+    assertTrue(result is Result.Error)
+    result as Result.Error
+    assertEquals(ServiceError.MISSING_JWT, result.error)
   }
 
   @Test
@@ -90,10 +90,10 @@ class UserServiceTest {
 
     val result = userService.getUserOrRegister(jwt)
 
-    assertTrue(result is APIResult.Error)
-    result as APIResult.Error
-    assertEquals(HttpStatus.BAD_REQUEST, result.code)
-    assertTrue(result.message.contains("Missing required JWT claims"))
+    assertTrue(result is Result.Error)
+    result as Result.Error
+    assertEquals(ServiceError.MISSING_JWT_CLAIMS, result.error)
+    assertTrue(result.message!!.contains("Missing required JWT claims"))
   }
 
   @Test
@@ -102,10 +102,9 @@ class UserServiceTest {
 
     val result = userService.getUserOrRegister(jwt)
 
-    assertTrue(result is APIResult.Error)
-    result as APIResult.Error
-    assertEquals(HttpStatus.BAD_REQUEST, result.code)
-    assertEquals("Invalid birthdate format in JWT", result.message)
+    assertTrue(result is Result.Error)
+    result as Result.Error
+    assertEquals(ServiceError.INVALID_BIRTHDATE_FORMAT, result.error)
   }
 
   @Test
@@ -114,10 +113,9 @@ class UserServiceTest {
 
     val result = userService.getUserOrRegister(jwt)
 
-    assertTrue(result is APIResult.Error)
-    result as APIResult.Error
-    assertEquals(HttpStatus.BAD_REQUEST, result.code)
-    assertEquals("Invalid gender in JWT", result.message)
+    assertTrue(result is Result.Error)
+    result as Result.Error
+    assertEquals(ServiceError.INVALID_GENDER, result.error)
   }
 
   @Test
@@ -130,10 +128,9 @@ class UserServiceTest {
 
     val result = userService.getUserOrRegister(jwt)
 
-    assertTrue(result is APIResult.Error)
-    result as APIResult.Error
-    assertEquals(HttpStatus.BAD_REQUEST, result.code)
-    assertEquals("User is underaged", result.message)
+    assertTrue(result is Result.Error)
+    result as Result.Error
+    assertEquals(ServiceError.USER_UNDERAGED, result.error)
     verify(mockUserRepository, never()).save(any())
   }
 
@@ -155,8 +152,8 @@ class UserServiceTest {
 
     val result = userService.getUserOrRegister(jwt)
 
-    assertTrue(result is APIResult.Success<UserRegistrationResult>)
-    result as APIResult.Success<UserRegistrationResult>
+    assertTrue(result is Result.Success<UserRegistrationResult>)
+    result as Result.Success<UserRegistrationResult>
     assertEquals(existingUser, result.value.user)
     assertFalse(result.value.wasCreated)
     verify(mockUserRepository, never()).save(any())
@@ -180,8 +177,8 @@ class UserServiceTest {
 
     val result = userService.getUserOrRegister(jwt)
 
-    assertTrue(result is APIResult.Success<UserRegistrationResult>)
-    result as APIResult.Success<UserRegistrationResult>
+    assertTrue(result is Result.Success<UserRegistrationResult>)
+    result as Result.Success<UserRegistrationResult>
     assertEquals("user123", result.value.user.id)
     assertEquals("John", result.value.user.givenName)
     assertEquals("Doe", result.value.user.familyName)
@@ -209,8 +206,8 @@ class UserServiceTest {
 
     val result = userService.getUserOrRegister(jwt)
 
-    assertTrue(result is APIResult.Success<UserRegistrationResult>)
-    result as APIResult.Success<UserRegistrationResult>
+    assertTrue(result is Result.Success<UserRegistrationResult>)
+    result as Result.Success<UserRegistrationResult>
     assertEquals(Gender.Female, result.value.user.gender)
     assertTrue(result.value.wasCreated)
   }

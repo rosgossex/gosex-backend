@@ -1,6 +1,7 @@
 package gosex.backend.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import gosex.backend.dto.ServiceError
 import gosex.backend.model.Gender
 import gosex.backend.model.User
 import gosex.backend.repository.UserRepository
@@ -92,7 +93,12 @@ class UserControllerIntegrationTest {
     mockMvc
       .perform(get("/users/search").param("q", "").with(jwt()))
       .andExpect(status().isBadRequest)
-      .andExpect(content().json("{\"message\":\"Missing or empty 'q' query parameter\"}"))
+      .andExpect(
+        content()
+          .json(
+            "{\"code\":\"${ServiceError.MISSING_QUERY_PARAMETER.code}\",\"message\":\"${ServiceError.MISSING_QUERY_PARAMETER.messageTemplate}\"}"
+          )
+      )
   }
 
   @Test
@@ -174,7 +180,12 @@ class UserControllerIntegrationTest {
           )
       )
       .andExpect(status().isBadRequest)
-      .andExpect(content().json("{\"message\":\"User is underaged\"}"))
+      .andExpect(
+        content()
+          .json(
+            "{\"code\":\"${ServiceError.USER_UNDERAGED.code}\",\"message\":\"${ServiceError.USER_UNDERAGED.messageTemplate}\"}"
+          )
+      )
   }
 
   @Test
