@@ -1,5 +1,5 @@
 services:
-  db:
+  backend-db:
     image: ${GOSEX_BACKEND_POSTGRES_IMAGE}:${GOSEX_BACKEND_POSTGRES_VERSION}
     environment:
       POSTGRES_DB: ${GOSEX_BACKEND_POSTGRES_DB}
