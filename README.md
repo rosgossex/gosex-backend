@@ -6,10 +6,11 @@ A Kotlin backend service built with Spring Boot for a dating application. The se
 
 The application follows a layered architecture:
 
-- **API Layer**: Spring MVC controllers for RESTful endpoints
+- **API Layer**: Spring MVC controllers for RESTful endpoints with OpenAPI documentation
 - **Service Layer**: Spring services with dependency injection for business logic
 - **Data Access Layer**: Spring Data JPA repositories for data persistence
 - **Model Layer**: JPA entities for domain objects
+- **DTO Layer**: Data transfer objects and standardized error handling
 - **Authentication**: Spring Security with JWT resource server configuration
 
 ## Development
@@ -91,8 +92,24 @@ Open `build/reports/jacoco/test/html/index.html` in your browser.
 ./gradlew jacocoTestCoverageVerification
 ```
 
+## API Documentation
+
+The application provides interactive API documentation via Swagger UI and OpenAPI specification.
+
+**Access Swagger UI (when running locally):**
+
+```shell
+open http://localhost:6969/swagger-ui/index.html
+```
+
+**Access OpenAPI spec:**
+
+```shell
+curl http://localhost:6969/v3/api-docs
+```
+
 ## Deployment
 
 ```shell
-docker compose up
+docker compose up -d --wait --build
 ```

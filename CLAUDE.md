@@ -22,8 +22,10 @@ The application follows a layered architecture:
 2. **User Management**: CRUD operations for users with search functionality via Spring Data JPA
 3. **Database**: PostgreSQL with Spring Data JPA for data persistence
 4. **API**: RESTful endpoints using Spring MVC for user registration and search
-5. **Testing**: Comprehensive unit and integration tests using Spring Boot Test framework with JaCoCo coverage
-6. **CI/CD**: GitHub Actions workflow for automated testing and coverage reporting
+5. **Error Handling**: Generic Result type with ServiceError enum for consistent error responses
+6. **OpenAPI Documentation**: Swagger UI and OpenAPI spec generation with Spring Doc
+7. **Testing**: Comprehensive unit and integration tests using Spring Boot Test framework with JaCoCo coverage
+8. **CI/CD**: GitHub Actions workflow for automated testing and coverage reporting
 
 ## Common Development Tasks
 
@@ -74,7 +76,17 @@ The application follows a layered architecture:
 ### Deployment
 
 ```bash
-docker compose --env-file .env.dev up -d --wait --build
+docker compose up -d --wait --build
+```
+
+### API Documentation
+
+```bash
+# Access Swagger UI (when running locally)
+open http://localhost:6969/swagger-ui/index.html
+
+# Access OpenAPI spec
+curl http://localhost:6969/v3/api-docs
 ```
 
 ## CI/CD Pipeline
@@ -96,11 +108,19 @@ The project uses GitHub Actions for automated testing and quality assurance:
 - `src/main/kotlin/gosex/backend`: Main source code
   - `Application.kt`: Spring Boot main application class
   - `Authentication.kt`: Spring Security configuration
+  - `OpenApiConfig.kt`: OpenAPI/Swagger configuration
   - `controller/`: Spring MVC REST controllers
+  - `dto/`: Data Transfer Objects and error definitions
+    - `ServiceError.kt`: Enum for standardized error types
+    - `ErrorResponseDto.kt`: Error response structure
+    - `UserDto.kt`: User data transfer object
   - `model/`: JPA entities (User, Gender)
   - `repository/`: Spring Data JPA repositories
   - `service/`: Spring service layer with business logic
+  - `util/`: Utility classes
+    - `Result.kt`: Generic Result type for error handling
 - `src/test/kotlin/gosex/backend`: Test source code
+  - `controller/`: Integration tests for REST controllers
   - `service/`: Unit tests for service layer
   - `repository/`: Integration tests for repository layer using Spring Boot Test
 - `src/main/resources/application.yaml`: Spring Boot configuration file

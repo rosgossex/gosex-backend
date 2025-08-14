@@ -29,7 +29,7 @@ services:
       GOSEX_BACKEND_POSTGRES_USER: ${GOSEX_BACKEND_POSTGRES_USER}
       GOSEX_BACKEND_POSTGRES_PASSWORD: ${GOSEX_BACKEND_POSTGRES_PASSWORD}
     depends_on:
-      db:
+      backend-db:
         condition: service_healthy
 
 volumes:
