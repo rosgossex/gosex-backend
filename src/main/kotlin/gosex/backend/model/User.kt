@@ -1,31 +1,33 @@
 package gosex.backend.model
 
-import kotlinx.datetime.Clock
+import com.fasterxml.jackson.annotation.JsonIgnore
+import jakarta.persistence.*
+import java.time.LocalDate as JavaLocalDate
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
-import kotlinx.serialization.Serializable
 
-@Serializable
+@Entity
+@Table(name = "users")
 data class User(
-  val id: String,
-  val birthdate: LocalDate,
-  val gender: Gender,
-  val givenName: String,
-  val familyName: String,
+  @Id @Column(name = "id", length = 36) val id: String,
+  @Column(name = "birthdate", nullable = false) val birthdate: JavaLocalDate,
+  @Enumerated(EnumType.STRING) @Column(name = "gender", nullable = false) val gender: Gender,
+  @Column(name = "given_name", nullable = false) val givenName: String,
+  @Column(name = "family_name", nullable = false) val familyName: String,
+  @Column(name = "full_name", nullable = false) val fullName: String = "$givenName $familyName",
 ) {
+  @get:JsonIgnore
   val age: Int
-  val fullName: String = "$givenName $familyName"
-
-  init {
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    if (
-      today.monthNumber < birthdate.monthNumber ||
-        (today.monthNumber == birthdate.monthNumber && today.dayOfMonth < birthdate.dayOfMonth)
-    ) {
-      age = today.year - birthdate.year - 1
-    } else {
-      age = today.year - birthdate.year
+    get() {
+      val today = java.time.LocalDate.now()
+      return if (
+        today.monthValue < birthdate.monthValue ||
+          (today.monthValue == birthdate.monthValue && today.dayOfMonth < birthdate.dayOfMonth)
+      ) {
+        today.year - birthdate.year - 1
+      } else {
+        today.year - birthdate.year
+      }
     }
-  }
+
+  constructor() : this("", JavaLocalDate.now(), Gender.Male, "", "", "")
 }

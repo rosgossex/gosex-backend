@@ -1,23 +1,14 @@
 package gosex.backend.service
 
-import com.auth0.jwt.interfaces.Claim
-import com.auth0.jwt.interfaces.Payload
+import gosex.backend.dto.ServiceError
 import gosex.backend.model.Gender
 import gosex.backend.model.User
-import gosex.backend.repo.UserRepository
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.auth.jwt.JWTPrincipal
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertIs
-import kotlin.test.assertTrue
-import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
-import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
-import kotlinx.datetime.todayIn
+import gosex.backend.repository.UserRepository
+import gosex.backend.util.Result
+import java.time.Instant
+import java.time.LocalDate
+import java.util.*
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -25,6 +16,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.security.oauth2.jwt.Jwt
 
 class UserServiceTest {
 
@@ -37,174 +29,185 @@ class UserServiceTest {
     userService = UserService(mockUserRepository)
   }
 
-  private fun createMockClaim(value: String?): Claim {
-    val claim = mock<Claim>()
-    whenever(claim.asString()).thenReturn(value)
-    return claim
-  }
-
-  private fun createJwtPrincipal(
+  private fun createJwt(
     sub: String? = "user123",
     givenName: String? = "John",
     familyName: String? = "Doe",
     birthdate: String? = "1990-01-01",
     gender: String? = "male",
-  ): JWTPrincipal {
-    val subClaim = createMockClaim(sub)
-    val givenNameClaim = createMockClaim(givenName)
-    val familyNameClaim = createMockClaim(familyName)
-    val birthdateClaim = createMockClaim(birthdate)
-    val genderClaim = createMockClaim(gender)
+  ): Jwt {
+    val claims = mutableMapOf<String, Any>()
+    sub?.let { claims["sub"] = it }
+    givenName?.let { claims["given_name"] = it }
+    familyName?.let { claims["family_name"] = it }
+    birthdate?.let { claims["birthdate"] = it }
+    gender?.let { claims["gender"] = it }
 
-    val mockPayload = mock<Payload>()
-    whenever(mockPayload.getClaim("sub")).thenReturn(subClaim)
-    whenever(mockPayload.getClaim("given_name")).thenReturn(givenNameClaim)
-    whenever(mockPayload.getClaim("family_name")).thenReturn(familyNameClaim)
-    whenever(mockPayload.getClaim("birthdate")).thenReturn(birthdateClaim)
-    whenever(mockPayload.getClaim("gender")).thenReturn(genderClaim)
-
-    val mockPrincipal = mock<JWTPrincipal>()
-    whenever(mockPrincipal.payload).thenReturn(mockPayload)
-    return mockPrincipal
+    return Jwt.withTokenValue("token")
+      .header("alg", "RS256")
+      .claims { it.putAll(claims) }
+      .issuedAt(Instant.now())
+      .expiresAt(Instant.now().plusSeconds(3600))
+      .build()
   }
 
   @Test
-  fun `searchUsersByName should delegate to repository`() = runBlocking {
+  fun `searchUsersByName should delegate to repository`() {
     val nameQuery = "John"
     val expectedUsers =
       listOf(
         User(
           id = "user1",
-          birthdate = LocalDate(1990, 1, 1),
+          birthdate = LocalDate.of(1990, 1, 1),
           gender = Gender.Male,
           givenName = "John",
           familyName = "Doe",
+          fullName = "John Doe",
         )
       )
 
-    whenever(mockUserRepository.usersByName(nameQuery)).thenReturn(expectedUsers)
+    whenever(mockUserRepository.findByNameContainingIgnoreCase(nameQuery)).thenReturn(expectedUsers)
 
     val result = userService.searchUsersByName(nameQuery)
 
     assertEquals(expectedUsers, result)
-    verify(mockUserRepository).usersByName(nameQuery)
+    verify(mockUserRepository).findByNameContainingIgnoreCase(nameQuery)
   }
 
   @Test
-  fun `getUserOrRegister should return error when JWT principal is null`() = runBlocking {
+  fun `getUserOrRegister should return error when JWT is null`() {
     val result = userService.getUserOrRegister(null)
 
-    assertIs<APIResult.Error>(result)
-    assertEquals(HttpStatusCode.BadRequest, result.code)
-    assertEquals("No JWT Principal", result.message)
+    assertTrue(result is Result.Error)
+    result as Result.Error
+    assertEquals(ServiceError.MISSING_JWT, result.error)
   }
 
   @Test
-  fun `getUserOrRegister should return error when JWT claims are missing`() = runBlocking {
-    val mockPrincipal =
-      createJwtPrincipal(
-        sub = null,
-        givenName = null,
-        familyName = null,
-        birthdate = null,
-        gender = null,
-      )
+  fun `getUserOrRegister should return error when JWT claims are missing`() {
+    val jwt =
+      createJwt(sub = null, givenName = null, familyName = null, birthdate = null, gender = null)
 
-    val result = userService.getUserOrRegister(mockPrincipal)
+    val result = userService.getUserOrRegister(jwt)
 
-    assertIs<APIResult.Error>(result)
-    assertEquals(HttpStatusCode.BadRequest, result.code)
-    assertTrue(result.message.contains("Missing required JWT claims"))
+    assertTrue(result is Result.Error)
+    result as Result.Error
+    assertEquals(ServiceError.MISSING_JWT_CLAIMS, result.error)
+    assertTrue(result.message!!.contains("Missing required JWT claims"))
   }
 
   @Test
-  fun `getUserOrRegister should return error when birthdate format is invalid`() = runBlocking {
-    val mockPrincipal = createJwtPrincipal(birthdate = "invalid-date")
+  fun `getUserOrRegister should return error when birthdate format is invalid`() {
+    val jwt = createJwt(birthdate = "invalid-date")
 
-    val result = userService.getUserOrRegister(mockPrincipal)
+    val result = userService.getUserOrRegister(jwt)
 
-    assertIs<APIResult.Error>(result)
-    assertEquals(HttpStatusCode.BadRequest, result.code)
-    assertEquals("Invalid birthdate format in JWT", result.message)
+    assertTrue(result is Result.Error)
+    result as Result.Error
+    assertEquals(ServiceError.INVALID_BIRTHDATE_FORMAT, result.error)
   }
 
   @Test
-  fun `getUserOrRegister should return error when gender is invalid`() = runBlocking {
-    val mockPrincipal = createJwtPrincipal(gender = "invalid")
+  fun `getUserOrRegister should return error when gender is invalid`() {
+    val jwt = createJwt(gender = "invalid")
 
-    val result = userService.getUserOrRegister(mockPrincipal)
+    val result = userService.getUserOrRegister(jwt)
 
-    assertIs<APIResult.Error>(result)
-    assertEquals(HttpStatusCode.BadRequest, result.code)
-    assertEquals("Invalid gender in JWT", result.message)
+    assertTrue(result is Result.Error)
+    result as Result.Error
+    assertEquals(ServiceError.INVALID_GENDER, result.error)
   }
 
   @Test
-  fun `getUserOrRegister should return error when user is underaged`() = runBlocking {
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    val underagedBirthdate = today.minus(DatePeriod(years = 17))
-    val mockPrincipal = createJwtPrincipal(birthdate = underagedBirthdate.toString())
+  fun `getUserOrRegister should return error when user is underaged`() {
+    val today = LocalDate.now()
+    val underagedBirthdate = today.minusYears(17)
+    val jwt = createJwt(birthdate = underagedBirthdate.toString())
 
-    whenever(mockUserRepository.userById("user123")).thenReturn(null)
+    whenever(mockUserRepository.findById("user123")).thenReturn(Optional.empty())
 
-    val result = userService.getUserOrRegister(mockPrincipal)
+    val result = userService.getUserOrRegister(jwt)
 
-    assertIs<APIResult.Error>(result)
-    assertEquals(HttpStatusCode.BadRequest, result.code)
-    assertEquals("User is underaged", result.message)
-    verify(mockUserRepository, never()).addUser(any())
+    assertTrue(result is Result.Error)
+    result as Result.Error
+    assertEquals(ServiceError.USER_UNDERAGED, result.error)
+    verify(mockUserRepository, never()).save(any())
   }
 
   @Test
-  fun `getUserOrRegister should return existing user when found`() = runBlocking {
+  fun `getUserOrRegister should return existing user when found`() {
     val existingUser =
       User(
         id = "user123",
-        birthdate = LocalDate(1990, 1, 1),
+        birthdate = LocalDate.of(1990, 1, 1),
         gender = Gender.Male,
         givenName = "John",
         familyName = "Doe",
+        fullName = "John Doe",
       )
 
-    val mockPrincipal = createJwtPrincipal()
+    val jwt = createJwt()
 
-    whenever(mockUserRepository.userById("user123")).thenReturn(existingUser)
+    whenever(mockUserRepository.findById("user123")).thenReturn(Optional.of(existingUser))
 
-    val result = userService.getUserOrRegister(mockPrincipal)
+    val result = userService.getUserOrRegister(jwt)
 
-    assertIs<APIResult.Success<UserRegistrationResult>>(result)
+    assertTrue(result is Result.Success<UserRegistrationResult>)
+    result as Result.Success<UserRegistrationResult>
     assertEquals(existingUser, result.value.user)
     assertFalse(result.value.wasCreated)
-    verify(mockUserRepository, never()).addUser(any())
+    verify(mockUserRepository, never()).save(any())
   }
 
   @Test
-  fun `getUserOrRegister should create new user when not found and user is of age`() = runBlocking {
-    val mockPrincipal = createJwtPrincipal()
+  fun `getUserOrRegister should create new user when not found and user is of age`() {
+    val jwt = createJwt()
+    val expectedUser =
+      User(
+        id = "user123",
+        birthdate = LocalDate.of(1990, 1, 1),
+        gender = Gender.Male,
+        givenName = "John",
+        familyName = "Doe",
+        fullName = "John Doe",
+      )
 
-    whenever(mockUserRepository.userById("user123")).thenReturn(null)
+    whenever(mockUserRepository.findById("user123")).thenReturn(Optional.empty())
+    whenever(mockUserRepository.save(any<User>())).thenReturn(expectedUser)
 
-    val result = userService.getUserOrRegister(mockPrincipal)
+    val result = userService.getUserOrRegister(jwt)
 
-    assertIs<APIResult.Success<UserRegistrationResult>>(result)
+    assertTrue(result is Result.Success<UserRegistrationResult>)
+    result as Result.Success<UserRegistrationResult>
     assertEquals("user123", result.value.user.id)
     assertEquals("John", result.value.user.givenName)
     assertEquals("Doe", result.value.user.familyName)
-    assertEquals(LocalDate(1990, 1, 1), result.value.user.birthdate)
+    assertEquals(LocalDate.of(1990, 1, 1), result.value.user.birthdate)
     assertEquals(Gender.Male, result.value.user.gender)
     assertTrue(result.value.wasCreated)
-    verify(mockUserRepository).addUser(result.value.user)
+    verify(mockUserRepository).save(any<User>())
   }
 
   @Test
-  fun `getUserOrRegister should handle female gender correctly`() = runBlocking {
-    val mockPrincipal = createJwtPrincipal(givenName = "Jane", gender = "female")
+  fun `getUserOrRegister should handle female gender correctly`() {
+    val jwt = createJwt(givenName = "Jane", gender = "female")
+    val expectedUser =
+      User(
+        id = "user123",
+        birthdate = LocalDate.of(1990, 1, 1),
+        gender = Gender.Female,
+        givenName = "Jane",
+        familyName = "Doe",
+        fullName = "Jane Doe",
+      )
 
-    whenever(mockUserRepository.userById("user123")).thenReturn(null)
+    whenever(mockUserRepository.findById("user123")).thenReturn(Optional.empty())
+    whenever(mockUserRepository.save(any<User>())).thenReturn(expectedUser)
 
-    val result = userService.getUserOrRegister(mockPrincipal)
+    val result = userService.getUserOrRegister(jwt)
 
-    assertIs<APIResult.Success<UserRegistrationResult>>(result)
+    assertTrue(result is Result.Success<UserRegistrationResult>)
+    result as Result.Success<UserRegistrationResult>
     assertEquals(Gender.Female, result.value.user.gender)
     assertTrue(result.value.wasCreated)
   }

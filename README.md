@@ -1,20 +1,33 @@
-# GoSex backend
+# GoSex Backend
+
+A Kotlin backend service built with Spring Boot for a dating application. The service handles user authentication via JWT tokens from ESIA (Russian government authentication system) and provides user management functionality.
+
+## Architecture
+
+The application follows a layered architecture:
+
+- **API Layer**: Spring MVC controllers for RESTful endpoints with OpenAPI documentation
+- **Service Layer**: Spring services with dependency injection for business logic
+- **Data Access Layer**: Spring Data JPA repositories for data persistence
+- **Model Layer**: JPA entities for domain objects
+- **DTO Layer**: Data transfer objects and standardized error handling
+- **Authentication**: Spring Security with JWT resource server configuration
 
 ## Development
 
-**Build and run with hot reload:**
-
-In first shell run gradle to continuous build your project
+**Build with hot reload:**
 
 ```shell
 ./gradlew -t build -x test -x check -i
 ```
 
-In another terminal run the application
+**Run the application:**
 
 ```shell
-./gradlew run -Dio.ktor.development=true
+docker compose up -d --wait --build
 ```
+
+**Note:** The application should only be run via Docker Compose for local development. Direct execution with `./gradlew bootRun` is not supported due to database dependencies.
 
 **Format:**
 
@@ -51,6 +64,18 @@ git commit --no-verify
 ./gradlew test
 ```
 
+**Run only unit tests:**
+
+```shell
+./gradlew test --tests "*.service.*"
+```
+
+**Run only integration tests:**
+
+```shell
+./gradlew test --tests "*.db.*"
+```
+
 **Generate coverage report:**
 
 ```shell
@@ -67,8 +92,24 @@ Open `build/reports/jacoco/test/html/index.html` in your browser.
 ./gradlew jacocoTestCoverageVerification
 ```
 
+## API Documentation
+
+The application provides interactive API documentation via Swagger UI and OpenAPI specification.
+
+**Access Swagger UI (when running locally):**
+
+```shell
+open http://localhost:6969/swagger-ui/index.html
+```
+
+**Access OpenAPI spec:**
+
+```shell
+curl http://localhost:6969/v3/api-docs
+```
+
 ## Deployment
 
 ```shell
-docker compose --env-file .env.dev up -d --wait --build
+docker compose up -d --wait --build
 ```

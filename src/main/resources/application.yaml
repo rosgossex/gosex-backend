@@ -1,19 +1,30 @@
-ktor:
-  development: true
-  application:
-    modules:
-      - gosex.backend.ApplicationKt.module
-  deployment:
-    port: 6969
+server:
+  port: 6969
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${GOSEX_BACKEND_POSTGRES_HOST}:${GOSEX_BACKEND_POSTGRES_PORT}/${GOSEX_BACKEND_POSTGRES_DB}
+    username: ${GOSEX_BACKEND_POSTGRES_USER}
+    password: ${GOSEX_BACKEND_POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${GOSEX_ESIA_URL}
+          issuer-uri: ${GOSEX_ESIA_ISSUERS}
 
 gosex:
   esia:
-    url: $GOSEX_ESIA_URL
-    issuers: $GOSEX_ESIA_ISSUERS
-  backend:
-    postgres:
-      port: $GOSEX_BACKEND_POSTGRES_PORT
-      host: $GOSEX_BACKEND_POSTGRES_HOST
-      db: $GOSEX_BACKEND_POSTGRES_DB
-      user: $GOSEX_BACKEND_POSTGRES_USER
-      password: $GOSEX_BACKEND_POSTGRES_PASSWORD
+    url: ${GOSEX_ESIA_URL}
+    issuers: ${GOSEX_ESIA_ISSUERS}
