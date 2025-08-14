@@ -34,10 +34,15 @@ The application follows a layered architecture:
 ```bash
 # Continuous build with hot reload
 ./gradlew -t build -x test -x check -i
-
-# Run application
-./gradlew bootRun
 ```
+
+**Run the application:**
+
+```bash
+docker compose up -d --wait --build
+```
+
+**Note:** The application should only be run via Docker Compose. Direct execution with `./gradlew bootRun` is not supported due to database dependencies and environment configuration requirements.
 
 ### Code Formatting
 

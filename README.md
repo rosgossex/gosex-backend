@@ -15,19 +15,19 @@ The application follows a layered architecture:
 
 ## Development
 
-**Build and run with hot reload:**
-
-In first shell run gradle to continuous build your project
+**Build with hot reload:**
 
 ```shell
 ./gradlew -t build -x test -x check -i
 ```
 
-In another terminal run the application
+**Run the application:**
 
 ```shell
-./gradlew bootRun
+docker compose up -d --wait --build
 ```
+
+**Note:** The application should only be run via Docker Compose for local development. Direct execution with `./gradlew bootRun` is not supported due to database dependencies.
 
 **Format:**
 
