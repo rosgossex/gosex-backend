@@ -55,6 +55,10 @@ class UserController(private val userService: UserService) {
               )
             ],
         ),
+        ApiResponse(
+          responseCode = "401",
+          description = "Unauthorized - missing or invalid JWT token",
+        ),
       ]
   )
   @GetMapping("/search")
@@ -116,13 +120,6 @@ class UserController(private val userService: UserService) {
         ApiResponse(
           responseCode = "401",
           description = "Unauthorized - missing or invalid JWT token",
-          content =
-            [
-              Content(
-                mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = Schema(implementation = ErrorResponseDto::class),
-              )
-            ],
         ),
       ]
   )
