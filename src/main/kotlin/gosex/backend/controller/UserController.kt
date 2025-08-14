@@ -29,6 +29,7 @@ class UserController(private val userService: UserService) {
   @Operation(
     summary = "Search users by name",
     description = "Search for users by their given name, family name, or full name",
+    security = [SecurityRequirement(name = "bearerAuth")],
   )
   @ApiResponses(
     value =
